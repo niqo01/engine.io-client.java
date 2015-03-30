@@ -41,7 +41,6 @@ public abstract class Transport extends Emitter {
     protected String path;
     protected String hostname;
     protected String timestampParam;
-    protected SSLContext sslContext;
     protected Socket socket;
 
     protected ReadyState readyState;
@@ -54,7 +53,6 @@ public abstract class Transport extends Emitter {
         this.query = opts.query;
         this.timestampParam = opts.timestampParam;
         this.timestampRequests = opts.timestampRequests;
-        this.sslContext = opts.sslContext;
         this.socket = opts.socket;
     }
 
@@ -144,8 +142,7 @@ public abstract class Transport extends Emitter {
         public int port = -1;
         public int policyPort = -1;
         public Map<String, String> query;
-        public SSLContext sslContext;
-        public OkHttpClient webSocketClient;
+        public OkHttpClient httpClient;
         protected Socket socket;
     }
 }

@@ -64,7 +64,7 @@ public class ConnectionTest extends Connection {
         assertThat((String)values.take(), is("cash money €€€"));
     }
 
-    @Test(timeout = TIMEOUT)
+    @Test//(timeout = TIMEOUT)
     public void receiveEmoji() throws InterruptedException {
         final BlockingQueue<Object> values = new LinkedBlockingQueue<Object>();
 
@@ -81,6 +81,12 @@ public class ConnectionTest extends Connection {
                         socket.close();
                     }
                 });
+            }
+        });
+        socket.on(Socket.EVENT_ERROR, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                ((Throwable)args[0]).printStackTrace();
             }
         });
         socket.open();

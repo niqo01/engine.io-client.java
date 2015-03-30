@@ -36,22 +36,7 @@ public class WebSocket extends Transport {
     public WebSocket(Options opts) {
         super(opts);
         this.name = NAME;
-        if (opts.webSocketClient == null){
-            client = defaultClient();
-        } else {
-            client = opts.webSocketClient;
-        }
-        if (this.sslContext != null) {
-          client.setSslSocketFactory(sslContext.getSocketFactory());
-        }
-    }
-
-    private OkHttpClient defaultClient() {
-        OkHttpClient wsClient = new OkHttpClient();
-        wsClient.setConnectTimeout(15, TimeUnit.SECONDS);
-        wsClient.setReadTimeout(15, TimeUnit.SECONDS);
-        wsClient.setWriteTimeout(15, TimeUnit.SECONDS);
-        return wsClient;
+        this.client = opts.httpClient;
     }
 
     protected void doOpen() {

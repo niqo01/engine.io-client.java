@@ -1,11 +1,14 @@
 package com.github.nkzawa.engineio.client;
 
+import com.squareup.okhttp.OkHttpClient;
 import org.junit.After;
 import org.junit.Before;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -76,6 +79,8 @@ public abstract class Connection {
     Socket.Options createOptions() {
         Socket.Options opts = new Socket.Options();
         opts.port = PORT;
+        opts.httpClient = new OkHttpClient();
+        opts.httpClient.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("192.168.1.68", 8888)));
         return opts;
     }
 

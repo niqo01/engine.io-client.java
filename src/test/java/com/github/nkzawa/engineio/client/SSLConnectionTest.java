@@ -28,17 +28,7 @@ public class SSLConnectionTest extends Connection {
         }
     };
 
-    static {
-        // for test on localhost
-        javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-    }
-
     private Socket socket;
-
-    @After
-    public void tearDown() {
-        Socket.setDefaultSSLContext(null);
-    }
 
     @Override
     Socket.Options createOptions() {
@@ -73,7 +63,10 @@ public class SSLConnectionTest extends Connection {
         final BlockingQueue<Object> values = new LinkedBlockingQueue<Object>();
 
         Socket.Options opts = createOptions();
-        opts.sslContext = createSSLContext();
+        OkHttpClient client = new OkHttpClient();
+        client.setHostnameVerifier(hostnameVerifier);
+        client.setSocketFactory(createSSLContext().getSocketFactory());
+        opts.httpClient = client;
         socket = new Socket(opts);
         socket.on(Socket.EVENT_OPEN, new Emitter.Listener() {
             @Override
@@ -97,10 +90,10 @@ public class SSLConnectionTest extends Connection {
         final BlockingQueue<Object> values = new LinkedBlockingQueue<Object>();
 
         Socket.Options opts = createOptions();
-        opts.sslContext = createSSLContext();
-        OkHttpClient wsClient = new OkHttpClient();
-        wsClient.setHostnameVerifier(hostnameVerifier);
-        opts.webSocketClient = wsClient;
+        OkHttpClient client = new OkHttpClient();
+        client.setHostnameVerifier(hostnameVerifier);
+        client.setSocketFactory(createSSLContext().getSocketFactory());
+        opts.httpClient = client;
         socket = new Socket(opts);
         socket.on(Socket.EVENT_OPEN, new Emitter.Listener() {
             @Override
@@ -115,29 +108,6 @@ public class SSLConnectionTest extends Connection {
                                 values.offer(args[0]);
                             }
                         });
-                    }
-                });
-            }
-        });
-        socket.open();
-
-        assertThat((String)values.take(), is("hi"));
-        socket.close();
-    }
-
-    @Test(timeout = TIMEOUT)
-    public void defaultSSLContext() throws Exception {
-        final BlockingQueue<Object> values = new LinkedBlockingQueue<Object>();
-
-        Socket.setDefaultSSLContext(createSSLContext());
-        socket = new Socket(createOptions());
-        socket.on(Socket.EVENT_OPEN, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                socket.on(Socket.EVENT_MESSAGE, new Emitter.Listener() {
-                    @Override
-                    public void call(Object... args) {
-                        values.offer(args[0]);
                     }
                 });
             }

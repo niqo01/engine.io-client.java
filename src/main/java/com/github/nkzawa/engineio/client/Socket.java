@@ -97,8 +97,6 @@ public class Socket extends Emitter {
 
     private static boolean priorWebsocketSuccess = false;
 
-    private static SSLContext defaultSSLContext;
-
     private boolean secure;
     private boolean upgrade;
     private boolean timestampRequests;
@@ -121,15 +119,10 @@ public class Socket extends Emitter {
     /*package*/ Transport transport;
     private Future pingTimeoutTimer;
     private Future pingIntervalTimer;
-    private SSLContext sslContext;
-    private OkHttpClient webSocketClient;
+    private OkHttpClient httpClient;
 
     private ReadyState readyState;
     private ScheduledExecutorService heartbeatScheduler;
-
-    public static void setDefaultSSLContext(SSLContext sslContext) {
-        defaultSSLContext = sslContext;
-    }
 
     public Socket() {
         this(new Options());
@@ -186,8 +179,7 @@ public class Socket extends Emitter {
         }
 
         this.secure = opts.secure;
-        this.sslContext = opts.sslContext != null ? opts.sslContext : defaultSSLContext;
-        this.webSocketClient = opts.webSocketClient;
+        this.httpClient = opts.httpClient != null ? opts.httpClient: defaultClient();
         this.hostname = opts.hostname != null ? opts.hostname : "localhost";
         this.port = opts.port != 0 ? opts.port : (this.secure ? 443 : 80);
         this.query = opts.query != null ?
@@ -247,8 +239,7 @@ public class Socket extends Emitter {
         }
 
         Transport.Options opts = new Transport.Options();
-        opts.sslContext = this.sslContext;
-        opts.webSocketClient = this.webSocketClient;
+        opts.httpClient = this.httpClient;
         opts.hostname = this.hostname;
         opts.port = this.port;
         opts.secure = this.secure;
@@ -829,6 +820,14 @@ public class Socket extends Emitter {
             this.heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
         }
         return this.heartbeatScheduler;
+    }
+
+    private OkHttpClient defaultClient() {
+        OkHttpClient wsClient = new OkHttpClient();
+        wsClient.setConnectTimeout(15, TimeUnit.SECONDS);
+        wsClient.setReadTimeout(15, TimeUnit.SECONDS);
+        wsClient.setWriteTimeout(15, TimeUnit.SECONDS);
+        return wsClient;
     }
 
     public static class Options extends Transport.Options {
